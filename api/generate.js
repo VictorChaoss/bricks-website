@@ -55,6 +55,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash-image",
+        modalities: ["image"],
         messages: [{
           role: "user",
           content: `Generate a sleek, 3D glossy plastic lego minifigure character toy on a solid clean background. The minifigure MUST perfectly match this exact description: ${faceDescription}`
@@ -80,8 +81,11 @@ export default async function handler(req, res) {
             const urlMatch = content.match(/(https?:\/\/[^\s\)]+)/);
             if (urlMatch) {
                 imageOutputUrl = urlMatch[1];
-            } else {
+            } else if (content.startsWith("data:image")) {
                 imageOutputUrl = content;
+            } else {
+                // The AI output a brick of text, not an image!
+                return res.status(500).json({ error: 'AI output text instead of an image: ' + content.substring(0, 100) });
             }
         }
     }
