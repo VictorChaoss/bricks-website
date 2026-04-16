@@ -77,14 +77,26 @@ export default async function handler(req, res) {
         imageOutputUrl = generationData.data[0].url;
     } else if (generationData.choices && generationData.choices[0] && generationData.choices[0].message) {
         const content = generationData.choices[0].message.content;
-        if (typeof content === 'string') {
+        
+        if (Array.isArray(content)) {
+            // Multimodal outputs sometimes return an array of parts
+            for (const part of content) {
+                if (part.type === 'image_url' && part.image_url) {
+                    imageOutputUrl = part.image_url.url;
+                    break;
+                }
+            }
+        } else if (typeof content === 'string') {
             const urlMatch = content.match(/(https?:\/\/[^\s\)]+)/);
             if (urlMatch) {
                 imageOutputUrl = urlMatch[1];
             } else if (content.startsWith("data:image")) {
                 imageOutputUrl = content;
+            } else if (content.includes("data:image")) {
+                // Sometimes it wraps base64 in markdown like ![image](data:image...)
+                const b64Match = content.match(/(data:image[^\s\)]+)/);
+                if (b64Match) imageOutputUrl = b64Match[1];
             } else {
-                // The AI output a brick of text, not an image!
                 return res.status(500).json({ error: 'AI output text instead of an image: ' + content.substring(0, 100) });
             }
         }
