@@ -35,14 +35,14 @@ export default async function handler(req, res) {
       })
     });
 
+    const visionText = await visionResponse.text();
     if (!visionResponse.ok) {
-        const err = await visionResponse.text();
-        return res.status(500).json({ error: "Vision scan failed: " + err });
+        return res.status(500).json({ error: "Vision scan failed: " + visionText });
     }
 
-    const visionData = JSON.parse(await visionResponse.text());
+    const visionData = JSON.parse(visionText);
     if (!visionData.choices || !visionData.choices[0] || !visionData.choices[0].message) {
-        return res.status(500).json({ error: 'Invalid Vision structure: ' + JSON.stringify(visionData).substring(0, 200) });
+        return res.status(500).json({ error: 'Invalid Vision structure: ' + visionText.substring(0, 200) });
     }
     const faceDescription = visionData.choices[0].message.content;
 
@@ -62,15 +62,15 @@ export default async function handler(req, res) {
       })
     });
 
+    const generationText = await generationResponse.text();
     if (!generationResponse.ok) {
-      const errorText = await generationResponse.text();
-      return res.status(500).json({ error: 'Gen failed: ' + errorText });
+        return res.status(500).json({ error: 'Gen failed: ' + generationText });
     }
 
-    const generationData = JSON.parse(await generationResponse.text());
+    const generationData = JSON.parse(generationText);
     
     if (!generationData.choices || !generationData.choices[0] || !generationData.choices[0].message) {
-        return res.status(500).json({ error: 'Invalid API response structure: ' + JSON.stringify(generationData).substring(0, 200) });
+        return res.status(500).json({ error: 'Invalid API response structure: ' + generationText.substring(0, 200) });
     }
 
     let imageOutputUrl = generationData.choices[0].message.content;
