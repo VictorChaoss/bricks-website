@@ -51,7 +51,7 @@ export default async function handler(req, res) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "openai/dall-e-3",
+        model: "openai/gpt-5-image",
         messages: [{
           role: "user",
           content: `Generate a sleek, 3D glossy plastic lego minifigure character toy on a solid clean background. The minifigure MUST perfectly match this exact description: ${faceDescription}`
