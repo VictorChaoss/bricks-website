@@ -91,7 +91,9 @@ function showResult(imageUrl) {
     generateBtn.textContent = "GENERATE ANOTHER";
     
     resultImage.src = imageUrl;
-    downloadBtn.href = imageUrl;
+    
+    // Route download through our backend proxy to bypass Browser CORS blocks
+    downloadBtn.href = `/api/download?url=${encodeURIComponent(imageUrl)}`;
     
     resultZone.classList.remove('hidden');
     resultZone.scrollIntoView({ behavior: 'smooth' });
