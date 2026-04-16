@@ -272,3 +272,21 @@ if (minifigureGrid) {
     });
 }
 
+// Video Mute Toggle Logic
+const heroVideo = document.getElementById('heroVideo');
+const muteToggle = document.getElementById('muteToggle');
+
+if (heroVideo && muteToggle) {
+    muteToggle.addEventListener('click', () => {
+        if (heroVideo.muted) {
+            heroVideo.muted = false;
+            muteToggle.textContent = 'MUTE';
+            // Ensure play is forced just in case browser pauses on unmute
+            heroVideo.play().catch(e => console.log('Autoplay unmuted blocked', e));
+        } else {
+            heroVideo.muted = true;
+            muteToggle.textContent = 'UNMUTE';
+        }
+    });
+}
+

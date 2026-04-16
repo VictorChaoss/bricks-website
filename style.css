@@ -625,14 +625,34 @@ h2#lightbox-title {
 .video-wrapper {
     width: 100%;
     max-width: 1000px;
-    /* Constrain video size */
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     border: 1px solid var(--border);
     position: relative;
     aspect-ratio: 16/9;
-    /* Enforce standard video aspect ratio if needed, or let auto */
+}
+
+.mute-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+}
+
+.mute-btn:hover {
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent-glow);
 }
 
 .showcase-video {
