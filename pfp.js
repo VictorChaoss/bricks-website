@@ -92,8 +92,14 @@ function showResult(imageUrl) {
     
     resultImage.src = imageUrl;
     
-    // Route download through our backend proxy to bypass Browser CORS blocks
-    downloadBtn.href = `/api/download?url=${encodeURIComponent(imageUrl)}`;
+    // If the API returned a raw Base64 Data URL, we don't need the Proxy (and it would crash the query limit anyway)
+    if (imageUrl.startsWith('data:')) {
+        downloadBtn.href = imageUrl;
+        downloadBtn.removeAttribute('target'); // Download directly
+    } else {
+        // Route HTTP URLs through proxy to bypass CORS
+        downloadBtn.href = `/api/download?url=${encodeURIComponent(imageUrl)}`;
+    }
     
     resultZone.classList.remove('hidden');
     resultZone.scrollIntoView({ behavior: 'smooth' });
