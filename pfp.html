@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRICKS | AI PFP Maker</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="noise-overlay"></div>
+
+    <header>
+        <div class="logo">
+            <img src="assets/logo.jpg" alt="BRICKS Logo">
+        </div>
+        <div class="nav-links">
+            <a href="index.html">DISCOVER</a>
+            <a href="drops.html">DROPS</a>
+            <a href="minifigures.html">MINIFIGURES</a>
+            <a href="pfp.html" class="active">PFP MAKER</a>
+            <a href="socials.html">SOCIALS</a>
+            <a href="about.html">ABOUT</a>
+        </div>
+        <div class="cart-icon">CART (0)</div>
+    </header>
+
+    <main class="pfp-main">
+        <section class="pfp-container">
+            <div class="pfp-header">
+                <h1>AI PFP MAKER</h1>
+                <p>Turn any selfie into a highly detailed 3D plastic Bricks character.</p>
+            </div>
+            
+            <div class="pfp-workspace">
+                <div class="upload-zone" id="uploadZone">
+                    <input type="file" id="imageInput" accept="image/*" hidden>
+                    <div class="upload-content">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <p>Click or drag a selfie here</p>
+                    </div>
+                    <img id="imagePreview" class="hidden" alt="Preview">
+                </div>
+
+                <div class="pfp-actions">
+                    <button id="generateBtn" class="generate-btn" disabled>GENERATE BRICKS PFP</button>
+                    <div id="loadingStatus" class="loading-status hidden">
+                        <div class="spinner"></div>
+                        <p id="statusText">Scanning Face...</p>
+                    </div>
+                    <div id="errorBox" class="error-box hidden"></div>
+                </div>
+
+                <div id="resultZone" class="result-zone hidden">
+                    <h2 class="result-title">YOUR BRICKS IDENTITY</h2>
+                    <img id="resultImage" alt="Generated Bricks PFP">
+                    <br>
+                    <a id="downloadBtn" class="download-btn" download="bricks_pfp.png" target="_blank">DOWNLOAD PFP</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 BRICKS Satire Project. Not affiliated with The LEGO Group.</p>
+        </div>
+    </footer>
+
+    <script src="pfp.js"></script>
+</body>
+</html>
