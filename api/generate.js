@@ -36,11 +36,14 @@ export default async function handler(req, res) {
     });
 
     if (!visionResponse.ok) {
-        const err = await visionResponse.json();
-        return res.status(500).json({ error: "Vision scan failed: " + (err.error?.message || "Unknown error") });
+        const err = await visionResponse.text();
+        return res.status(500).json({ error: "Vision scan failed: " + err });
     }
 
-    const visionData = await visionResponse.json();
+    const visionData = JSON.parse(await visionResponse.text());
+    if (!visionData.choices || !visionData.choices[0] || !visionData.choices[0].message) {
+        return res.status(500).json({ error: 'Invalid Vision structure: ' + JSON.stringify(visionData).substring(0, 200) });
+    }
     const faceDescription = visionData.choices[0].message.content;
 
     // Step 2: Generate the Lego PFP using DALL-E 3 on OpenRouter
@@ -60,13 +63,16 @@ export default async function handler(req, res) {
     });
 
     if (!generationResponse.ok) {
-      const error = await generationResponse.json();
-      return res.status(500).json({ error: error.error?.message || 'Failed to generate image' });
+      const errorText = await generationResponse.text();
+      return res.status(500).json({ error: 'Gen failed: ' + errorText });
     }
 
-    const generationData = await generationResponse.json();
+    const generationData = JSON.parse(await generationResponse.text());
     
-    // OpenRouter returns image URLs either directly or wrapped in Markdown
+    if (!generationData.choices || !generationData.choices[0] || !generationData.choices[0].message) {
+        return res.status(500).json({ error: 'Invalid API response structure: ' + JSON.stringify(generationData).substring(0, 200) });
+    }
+
     let imageOutputUrl = generationData.choices[0].message.content;
     const urlMatch = imageOutputUrl.match(/(https?:\/\/[^\s\)]+)/);
     if (urlMatch) {
@@ -76,6 +82,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ url: imageOutputUrl });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: 'Server Crash: ' + error.message });
   }
 }
