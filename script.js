@@ -138,14 +138,15 @@ if (prevBtn) prevBtn.onclick = () => setMainImage(currentImageIndex - 1);
 if (nextBtn) nextBtn.onclick = () => setMainImage(currentImageIndex + 1);
 
 function closeLightboxFunc() {
-    lightbox.classList.add('hidden');
+    if (lightbox) lightbox.classList.add('hidden');
     document.body.style.overflow = '';
 }
 
-closeLightbox.addEventListener('click', closeLightboxFunc);
+if (closeLightbox) closeLightbox.addEventListener('click', closeLightboxFunc);
 if (lightboxBackdrop) lightboxBackdrop.addEventListener('click', closeLightboxFunc);
 
 document.addEventListener('keydown', (e) => {
+    if (!lightbox) return;
     if (e.key === 'Escape') closeLightboxFunc();
     if (!lightbox.classList.contains('hidden')) {
         if (e.key === 'ArrowLeft') setMainImage(currentImageIndex - 1);
@@ -287,6 +288,25 @@ if (heroVideo && muteToggle) {
             heroVideo.muted = true;
             muteToggle.textContent = 'UNMUTE';
         }
+    });
+}
+
+function copyCA(element) {
+    const caTextElement = element.querySelector('.ca-text');
+    if (!caTextElement) return;
+    
+    const textToCopy = caTextElement.textContent;
+    if (textToCopy === 'COMING SOON' || textToCopy === 'NOT YET AVAILABLE') {
+        const originalText = caTextElement.textContent;
+        caTextElement.textContent = 'NOT YET AVAILABLE';
+        setTimeout(() => caTextElement.textContent = originalText, 1500);
+        return;
+    }
+    
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        const originalText = caTextElement.textContent;
+        caTextElement.textContent = 'COPIED!';
+        setTimeout(() => caTextElement.textContent = originalText, 1500);
     });
 }
 
