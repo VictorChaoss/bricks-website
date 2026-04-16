@@ -64,7 +64,7 @@ generateBtn.addEventListener('click', async () => {
     loadingStatus.classList.remove('hidden');
     errorBox.classList.add('hidden');
     resultZone.classList.add('hidden');
-    statusText.textContent = "Uploading Image...";
+    statusText.textContent = "Scanning Face & Assembling Bricks (Takes ~20s)...";
 
     try {
         const res = await fetch('/api/generate', {
@@ -76,42 +76,14 @@ generateBtn.addEventListener('click', async () => {
         const data = await res.json();
         
         if (!res.ok) {
-            throw new Error(data.error || 'Failed to start generation.');
+            throw new Error(data.error || 'Failed to generate image.');
         }
 
-        pollStatus(data.id);
+        showResult(data.url);
     } catch (err) {
         showError(err.message);
     }
 });
-
-async function pollStatus(id) {
-    statusText.textContent = "Assembling Bricks (Takes ~15 secs)...";
-    
-    const interval = setInterval(async () => {
-        try {
-            const res = await fetch(`/api/status?id=${id}`);
-            const data = await res.json();
-
-            if (!res.ok) {
-                clearInterval(interval);
-                throw new Error(data.error || 'Failed to check status');
-            }
-
-            if (data.status === 'succeeded') {
-                clearInterval(interval);
-                showResult(data.output[0] || data.output);
-            } else if (data.status === 'failed' || data.status === 'canceled') {
-                clearInterval(interval);
-                throw new Error("Generation " + data.status);
-            }
-            // If processing, do nothing and wait for next poll
-        } catch (err) {
-            clearInterval(interval);
-            showError(err.message);
-        }
-    }, 2500);
-}
 
 function showResult(imageUrl) {
     loadingStatus.classList.add('hidden');
