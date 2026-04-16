@@ -82,9 +82,15 @@ export default async function handler(req, res) {
       imageUrl = genData.data[0].url;
     } else if (genData?.data?.[0]?.b64_json) {
       imageUrl = `data:image/png;base64,${genData.data[0].b64_json}`;
+    } else if (genData?.choices?.[0]?.message) {
+      // OpenRouter wraps image output as chat.completion - inspect the message structure
+      const msg = genData.choices[0].message;
+      // Dump the full message content structure for debugging
+      return res.status(500).json({ 
+        error: 'DEBUG - message structure: ' + JSON.stringify(msg).substring(0, 800) 
+      });
     } else {
-      // Dump raw response so we can see what format it returned
-      return res.status(500).json({ error: 'Unrecognized image response: ' + genText.substring(0, 400) });
+      return res.status(500).json({ error: 'Unrecognized structure keys: ' + Object.keys(genData).join(', ') + ' | ' + genText.substring(0, 300) });
     }
 
     return res.status(200).json({ url: imageUrl });
