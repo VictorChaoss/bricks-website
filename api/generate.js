@@ -69,14 +69,25 @@ export default async function handler(req, res) {
 
     const generationData = JSON.parse(generationText);
     
-    if (!generationData.choices || !generationData.choices[0] || !generationData.choices[0].message) {
-        return res.status(500).json({ error: 'Invalid API response structure: ' + generationText.substring(0, 200) });
+    let imageOutputUrl = null;
+
+    if (generationData.data && generationData.data[0] && generationData.data[0].url) {
+        // Standard DALL-E format fallback
+        imageOutputUrl = generationData.data[0].url;
+    } else if (generationData.choices && generationData.choices[0] && generationData.choices[0].message) {
+        const content = generationData.choices[0].message.content;
+        if (typeof content === 'string') {
+            const urlMatch = content.match(/(https?:\/\/[^\s\)]+)/);
+            if (urlMatch) {
+                imageOutputUrl = urlMatch[1];
+            } else {
+                imageOutputUrl = content;
+            }
+        }
     }
 
-    let imageOutputUrl = generationData.choices[0].message.content;
-    const urlMatch = imageOutputUrl.match(/(https?:\/\/[^\s\)]+)/);
-    if (urlMatch) {
-        imageOutputUrl = urlMatch[1];
+    if (!imageOutputUrl) {
+         return res.status(500).json({ error: 'Unrecognized API output: ' + generationText.substring(0, 200) });
     }
 
     return res.status(200).json({ url: imageOutputUrl });
