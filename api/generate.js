@@ -10,93 +10,101 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'No image provided' });
   }
 
-  try {
-    const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: 'OPENROUTER_API_KEY is missing in Vercel Environment Variables.' });
-    }
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: 'OPENROUTER_API_KEY missing from Vercel environment variables.' });
+  }
 
-    // Step 1: Describe the person using vision model
-    const visionResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+  const headers = {
+    "Authorization": `Bearer ${apiKey}`,
+    "Content-Type": "application/json",
+    "HTTP-Referer": "https://bricks-website.vercel.app",
+    "X-Title": "Bricks PFP Maker"
+  };
+
+  try {
+    // ── Step 1: Describe the person ──────────────────────────────────────────
+    const visionRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify({
         model: "openai/gpt-4o-mini",
         messages: [{
           role: "user",
           content: [
-            { type: "text", text: "Describe this person's exact physical appearance (hair color/style, facial features, skin tone, prominent clothing) in a highly detailed 2-sentence paragraph. Do not mention the background." },
+            { type: "text", text: "Describe this person's physical appearance (hair color, style, facial features, skin tone, clothing) in a detailed 2‑sentence paragraph. Be specific. Do not mention the background." },
             { type: "image_url", image_url: { url: image } }
           ]
         }]
       })
     });
 
-    const visionText = await visionResponse.text();
-    if (!visionResponse.ok) {
-      return res.status(500).json({ error: "Vision failed: " + visionText });
+    if (!visionRes.ok) {
+      const t = await visionRes.text();
+      return res.status(502).json({ error: `Vision call failed (${visionRes.status}): ${t.substring(0, 300)}` });
     }
 
-    const visionData = JSON.parse(visionText);
-    if (!visionData.choices?.[0]?.message?.content) {
-      return res.status(500).json({ error: 'Vision returned unexpected structure: ' + visionText.substring(0, 300) });
+    const visionJson = await visionRes.json();
+    const description = visionJson?.choices?.[0]?.message?.content;
+    if (!description || typeof description !== "string") {
+      return res.status(502).json({ error: "Vision returned no description: " + JSON.stringify(visionJson).substring(0, 200) });
     }
-    const faceDescription = visionData.choices[0].message.content;
 
-    // Step 2: Generate the Lego image
-    // Using openai/gpt-4o as the image generation bridge — returns a real image URL
-    const genRes = await fetch("https://openrouter.ai/api/v1/images/generations", {
+    // ── Step 2: Generate the Lego image ──────────────────────────────────────
+    const genRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify({
-        model: "openai/gpt-5-image-mini",
-        prompt: `A 3D rendered glossy plastic LEGO minifigure toy with a plain white background. The minifigure looks like: ${faceDescription}. Studio lighting, photorealistic, clean product shot.`,
-        n: 1,
-        size: "1024x1024",
-        response_format: "url"
+        model: "google/gemini-2.5-flash-image",
+        modalities: ["image", "text"],
+        messages: [{
+          role: "user",
+          content: `Create a 3D rendered glossy plastic LEGO minifigure character on a clean white background. The LEGO figure must match this person's appearance exactly: ${description}. Studio lighting, product photo style.`
+        }]
       })
     });
 
-    const genText = await genRes.text();
     if (!genRes.ok) {
-      return res.status(500).json({ error: 'Image generation failed: ' + genText });
+      const t = await genRes.text();
+      return res.status(502).json({ error: `Generation call failed (${genRes.status}): ${t.substring(0, 300)}` });
     }
 
-    // Parse the standard OpenAI images/generations response: { data: [{ url: "..." }] }
-    let genData;
-    try {
-      genData = JSON.parse(genText);
-    } catch (e) {
-      return res.status(500).json({ error: 'Failed to parse image response: ' + genText.substring(0, 300) });
+    const genJson = await genRes.json();
+    const content = genJson?.choices?.[0]?.message?.content;
+
+    // OpenRouter image models return content as an array of typed parts
+    if (Array.isArray(content)) {
+      for (const part of content) {
+        if (part.type === "image_url" && part.image_url?.url) {
+          return res.status(200).json({ url: part.image_url.url });
+        }
+        // Some models nest the image inside inline_data
+        if (part.type === "image" && part.source?.data) {
+          const mime = part.source.media_type || "image/png";
+          return res.status(200).json({ url: `data:${mime};base64,${part.source.data}` });
+        }
+      }
+      // Parts found but no image — dump them so we can see the structure
+      return res.status(502).json({ error: "No image part in response. Parts: " + JSON.stringify(content).substring(0, 400) });
     }
 
-    // Support both standard URL format and b64_json format
-    let imageUrl = null;
-    if (genData?.data?.[0]?.url) {
-      imageUrl = genData.data[0].url;
-    } else if (genData?.data?.[0]?.b64_json) {
-      imageUrl = `data:image/png;base64,${genData.data[0].b64_json}`;
-    } else if (genData?.choices?.[0]?.message) {
-      // OpenRouter wraps image output as chat.completion - inspect the message structure
-      const msg = genData.choices[0].message;
-      // Dump the full message content structure for debugging
-      return res.status(500).json({ 
-        error: 'DEBUG - message structure: ' + JSON.stringify(msg).substring(0, 800) 
-      });
-    } else {
-      return res.status(500).json({ error: 'Unrecognized structure keys: ' + Object.keys(genData).join(', ') + ' | ' + genText.substring(0, 300) });
+    // Some models return content as a plain string with a data URI or URL
+    if (typeof content === "string") {
+      const urlMatch = content.match(/(https?:\/\/[^\s)]+)/);
+      if (urlMatch) return res.status(200).json({ url: urlMatch[1] });
+
+      const b64Match = content.match(/(data:image\/[^\s)]+)/);
+      if (b64Match) return res.status(200).json({ url: b64Match[1] });
+
+      // String content but no image found — show it
+      return res.status(502).json({ error: "Content was text, not image: " + content.substring(0, 300) });
     }
 
-    return res.status(200).json({ url: imageUrl });
+    // Totally unexpected structure — dump it
+    return res.status(502).json({ error: "Unexpected response structure: " + JSON.stringify(genJson).substring(0, 400) });
 
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Fatal: ' + error.message });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Server exception: " + err.message });
   }
 }
