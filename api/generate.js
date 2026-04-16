@@ -5,10 +5,12 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const { image } = req.body;
+  const { image, background } = req.body;
   if (!image) {
     return res.status(400).json({ error: 'No image provided' });
   }
+
+  const bg = (background && background.trim()) ? background.trim() : 'clean white studio background';
 
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
@@ -58,7 +60,7 @@ export default async function handler(req, res) {
 
     // ── Step 2: Generate Lego image via Pollinations.ai (Flux, free, no key) ─
     // Build a highly targeted prompt
-    const prompt = `A 3D rendered glossy plastic LEGO minifigure toy. The minifigure has these features: ${description}. Clean white studio background, soft product lighting, photorealistic plastic texture, LEGO branded style, square yellow head.`;
+    const prompt = `A 3D rendered glossy plastic LEGO minifigure character. The LEGO figure must match this person's appearance exactly: ${description}. Background: ${bg}. Studio lighting, product photo style, photorealistic LEGO plastic texture.`;
 
     const encodedPrompt = encodeURIComponent(prompt);
     const imageGenUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&model=flux&nologo=true&seed=${Math.floor(Math.random() * 999999)}`;

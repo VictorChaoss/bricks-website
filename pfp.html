@@ -49,6 +49,19 @@
                 </div>
 
                 <div class="pfp-actions">
+                    <div class="background-picker">
+                        <p class="bg-label">BACKGROUND</p>
+                        <div class="bg-presets" id="bgPresets">
+                            <button class="bg-chip active" data-bg="clean white studio background">⬜ White</button>
+                            <button class="bg-chip" data-bg="futuristic neon cyberpunk city at night">🌆 Cyber City</button>
+                            <button class="bg-chip" data-bg="outer space with stars and nebula">🌌 Space</button>
+                            <button class="bg-chip" data-bg="tropical beach with palm trees and ocean">🏖️ Beach</button>
+                            <button class="bg-chip" data-bg="snowy mountain peak at sunrise">🏔️ Mountain</button>
+                            <button class="bg-chip" data-bg="lego brick pattern colourful background">🧱 LEGO Bricks</button>
+                            <button class="bg-chip" data-bg="custom">✏️ Custom</button>
+                        </div>
+                        <input type="text" id="customBgInput" class="custom-bg-input hidden" placeholder="Describe your background..." maxlength="100">
+                    </div>
                     <button id="generateBtn" class="generate-btn" disabled>GENERATE BRICKS PFP</button>
                     <div id="loadingStatus" class="loading-status hidden">
                         <div class="spinner"></div>

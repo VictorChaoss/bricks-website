@@ -9,8 +9,31 @@ const errorBox      = document.getElementById('errorBox');
 const resultZone    = document.getElementById('resultZone');
 const resultImage   = document.getElementById('resultImage');
 const downloadBtn   = document.getElementById('downloadBtn');
+const bgPresets     = document.getElementById('bgPresets');
+const customBgInput = document.getElementById('customBgInput');
 
 let base64Image = null;
+let selectedBg  = 'clean white studio background'; // default
+
+// ── Background Chip Logic ─────────────────────────────────────────────────────
+bgPresets.addEventListener('click', e => {
+    const chip = e.target.closest('.bg-chip');
+    if (!chip) return;
+    bgPresets.querySelectorAll('.bg-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    if (chip.dataset.bg === 'custom') {
+        customBgInput.classList.remove('hidden');
+        customBgInput.focus();
+        selectedBg = customBgInput.value || 'colourful abstract background';
+    } else {
+        customBgInput.classList.add('hidden');
+        selectedBg = chip.dataset.bg;
+    }
+});
+
+customBgInput.addEventListener('input', () => {
+    selectedBg = customBgInput.value.trim() || 'colourful abstract background';
+});
 
 // ── Drag & Drop ───────────────────────────────────────────────────────────────
 uploadZone.addEventListener('click', () => imageInput.click());
@@ -65,7 +88,7 @@ generateBtn.addEventListener('click', async () => {
         const res = await fetch('/api/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: base64Image }),
+            body: JSON.stringify({ image: base64Image, background: selectedBg }),
             signal: controller.signal
         });
         clearTimeout(timeout);

@@ -1025,3 +1025,72 @@ h2#lightbox-title {
     .upload-zone { min-height: 200px; padding: 1.5rem; }
     .generate-btn { font-size: 1.2rem; padding: 1rem; }
 }
+
+/* ── Background Picker ─────────────────────────────────────────────────────── */
+.background-picker {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.bg-label {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.6rem;
+}
+
+.bg-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.bg-chip {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+    font-family: var(--font-body);
+}
+
+.bg-chip:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border-color: rgba(255,255,255,0.3);
+}
+
+.bg-chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+    font-weight: 600;
+}
+
+.custom-bg-input {
+    margin-top: 0.7rem;
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: #fff;
+    padding: 0.6rem 1rem;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.custom-bg-input:focus {
+    border-color: var(--accent);
+}
+
+.custom-bg-input::placeholder {
+    color: rgba(255,255,255,0.3);
+}
