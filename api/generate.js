@@ -1,4 +1,4 @@
-export const maxDuration = 60; // Give Vercel 60 seconds to prevent timeouts
+export const maxDuration = 60;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -13,10 +13,10 @@ export default async function handler(req, res) {
   try {
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
-        return res.status(500).json({ error: 'OPENROUTER_API_KEY is missing in Vercel Environment Variables.' });
+      return res.status(500).json({ error: 'OPENROUTER_API_KEY is missing in Vercel Environment Variables.' });
     }
 
-    // Step 1: Analyze the face using a Vision model on OpenRouter
+    // Step 1: Describe the person using vision model
     const visionResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -26,89 +26,71 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "openai/gpt-4o-mini",
         messages: [{
-            role: "user",
-            content: [
-              { type: "text", text: "Describe this person's exact physical appearance (hair color/style, facial features, skin tone, prominent clothing) in a highly detailed 2-sentence paragraph. Do not mention the background." },
-              { type: "image_url", image_url: { url: image } }
-            ]
+          role: "user",
+          content: [
+            { type: "text", text: "Describe this person's exact physical appearance (hair color/style, facial features, skin tone, prominent clothing) in a highly detailed 2-sentence paragraph. Do not mention the background." },
+            { type: "image_url", image_url: { url: image } }
+          ]
         }]
       })
     });
 
     const visionText = await visionResponse.text();
     if (!visionResponse.ok) {
-        return res.status(500).json({ error: "Vision scan failed: " + visionText });
+      return res.status(500).json({ error: "Vision failed: " + visionText });
     }
 
     const visionData = JSON.parse(visionText);
-    if (!visionData.choices || !visionData.choices[0] || !visionData.choices[0].message) {
-        return res.status(500).json({ error: 'Invalid Vision structure: ' + visionText.substring(0, 200) });
+    if (!visionData.choices?.[0]?.message?.content) {
+      return res.status(500).json({ error: 'Vision returned unexpected structure: ' + visionText.substring(0, 300) });
     }
     const faceDescription = visionData.choices[0].message.content;
 
-    // Step 2: Generate the Lego PFP using DALL-E 3 on OpenRouter
-    const generationResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    // Step 2: Generate the Lego image
+    // Using openai/gpt-4o as the image generation bridge — returns a real image URL
+    const genRes = await fetch("https://openrouter.ai/api/v1/images/generations", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
-        modalities: ["image"],
-        messages: [{
-          role: "user",
-          content: `Generate a sleek, 3D glossy plastic lego minifigure character toy on a solid clean background. The minifigure MUST perfectly match this exact description: ${faceDescription}`
-        }]
+        model: "openai/gpt-5-image-mini",
+        prompt: `A 3D rendered glossy plastic LEGO minifigure toy with a plain white background. The minifigure looks like: ${faceDescription}. Studio lighting, photorealistic, clean product shot.`,
+        n: 1,
+        size: "1024x1024",
+        response_format: "url"
       })
     });
 
-    const generationText = await generationResponse.text();
-    if (!generationResponse.ok) {
-        return res.status(500).json({ error: 'Gen failed: ' + generationText });
+    const genText = await genRes.text();
+    if (!genRes.ok) {
+      return res.status(500).json({ error: 'Image generation failed: ' + genText });
     }
 
-    const generationData = JSON.parse(generationText);
-    
-    let imageOutputUrl = null;
-
-    if (generationData.data && generationData.data[0] && generationData.data[0].url) {
-        // Standard DALL-E format fallback
-        imageOutputUrl = generationData.data[0].url;
-    } else if (generationData.choices && generationData.choices[0] && generationData.choices[0].message) {
-        const content = generationData.choices[0].message.content;
-        
-        if (Array.isArray(content)) {
-            // Multimodal outputs sometimes return an array of parts
-            for (const part of content) {
-                if (part.type === 'image_url' && part.image_url) {
-                    imageOutputUrl = part.image_url.url;
-                    break;
-                }
-            }
-        } else if (typeof content === 'string') {
-            const urlMatch = content.match(/(https?:\/\/[^\s\)]+)/);
-            if (urlMatch) {
-                imageOutputUrl = urlMatch[1];
-            } else if (content.startsWith("data:image")) {
-                imageOutputUrl = content;
-            } else if (content.includes("data:image")) {
-                // Sometimes it wraps base64 in markdown like ![image](data:image...)
-                const b64Match = content.match(/(data:image[^\s\)]+)/);
-                if (b64Match) imageOutputUrl = b64Match[1];
-            } else {
-                return res.status(500).json({ error: 'AI output text instead of an image: ' + content.substring(0, 100) });
-            }
-        }
+    // Parse the standard OpenAI images/generations response: { data: [{ url: "..." }] }
+    let genData;
+    try {
+      genData = JSON.parse(genText);
+    } catch (e) {
+      return res.status(500).json({ error: 'Failed to parse image response: ' + genText.substring(0, 300) });
     }
 
-    if (!imageOutputUrl) {
-         return res.status(500).json({ error: 'Unrecognized API output: ' + generationText.substring(0, 200) });
+    // Support both standard URL format and b64_json format
+    let imageUrl = null;
+    if (genData?.data?.[0]?.url) {
+      imageUrl = genData.data[0].url;
+    } else if (genData?.data?.[0]?.b64_json) {
+      imageUrl = `data:image/png;base64,${genData.data[0].b64_json}`;
+    } else {
+      // Dump raw response so we can see what format it returned
+      return res.status(500).json({ error: 'Unrecognized image response: ' + genText.substring(0, 400) });
     }
 
-    return res.status(200).json({ url: imageOutputUrl });
+    return res.status(200).json({ url: imageUrl });
+
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Server Crash: ' + error.message });
+    return res.status(500).json({ error: 'Fatal: ' + error.message });
   }
 }
