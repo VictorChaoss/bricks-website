@@ -1,139 +1,251 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA — Sets (Drops page)
+// Each entry: { file, category }
+// ─────────────────────────────────────────────────────────────────────────────
 const sets = [
-    "Alcatraz.jpg", "Blacked.png", "Chillhouse.png", "Clinton Set.jpg", "DB Cooper.jpg",
-    "Deathnote.png", "Dexter.png", "Doakes.png", "Freak Off.jpg", "Futurama.png",
-    "Gender Reveal.jpg", "I Cant Breathe.png", "ICE.jpg", "JFK.PNG", "Meth Lab.PNG",
-    "Migrants.jpg", "Monke.png", "Pablo.jpg", "Pride.png", "THE TURNING POINT.jpg",
-    "TMT Set.png", "TOP G.jpg", "The Crashout.jpg", "The Cybertruck.jpg", "The Deep Dive.jpg",
-    "The Drive.jpg", "The Glove.jpg", "The Ice Wall.jpg", "The Mask.jpg", "The Slap.jpg",
-    "The island.png", "The list.jpg", "The tunnel.jpg", "Tiger King.jpg", "Tokabu.png",
-    "wif.png", "Striped Pyjamas.png"
+    // Politics
+    { file: "JFK.PNG",               category: "politics" },
+    { file: "Clinton Set.jpg",        category: "politics" },
+    { file: "ICE.jpg",               category: "politics" },
+    { file: "Migrants.jpg",          category: "politics" },
+    { file: "TOP G.jpg",             category: "politics" },
+    { file: "The Cybertruck.jpg",    category: "politics" },
+    { file: "Strait of Hormuz.jpeg", category: "politics", isNew: true },
+
+    // Crime
+    { file: "Alcatraz.jpg",          category: "crime" },
+    { file: "DB Cooper.jpg",         category: "crime" },
+    { file: "Freak Off.jpg",         category: "crime" },
+    { file: "Meth Lab.PNG",          category: "crime" },
+    { file: "Pablo.jpg",             category: "crime" },
+    { file: "The island.png",        category: "crime" },
+    { file: "The list.jpg",          category: "crime" },
+    { file: "The tunnel.jpg",        category: "crime" },
+    { file: "Kit Kat Heist.jpeg",    category: "crime", isNew: true },
+    { file: "Artemis.jpeg",          category: "crime", isNew: true },
+
+    // Culture
+    { file: "Blacked.png",           category: "culture" },
+    { file: "Gender Reveal.jpg",     category: "culture" },
+    { file: "I Cant Breathe.png",    category: "culture" },
+    { file: "Pride.png",             category: "culture" },
+    { file: "Striped Pyjamas.png",   category: "culture" },
+    { file: "THE TURNING POINT.jpg", category: "culture" },
+    { file: "The Crashout.jpg",      category: "culture" },
+    { file: "Tokabu.png",            category: "culture" },
+    { file: "Italian Brainrot.jpeg", category: "culture", isNew: true },
+
+    // Sports
+    { file: "TMT Set.png",           category: "sports" },
+    { file: "The Glove.jpg",         category: "sports" },
+
+    // Internet / Entertainment
+    { file: "Chillhouse.png",        category: "internet" },
+    { file: "Deathnote.png",         category: "internet" },
+    { file: "Futurama.png",          category: "internet" },
+    { file: "Monke.png",             category: "internet" },
+    { file: "Tiger King.jpg",        category: "internet" },
+    { file: "wif.png",               category: "internet" },
+
+    // Culture (remaining)
+    { file: "Dexter.png",            category: "culture" },
+    { file: "Doakes.png",            category: "culture" },
+    { file: "The Deep Dive.jpg",     category: "culture" },
+    { file: "The Drive.jpg",         category: "culture" },
+    { file: "The Ice Wall.jpg",      category: "culture" },
+    { file: "The Mask.jpg",          category: "culture" },
+    { file: "The Slap.jpg",          category: "culture" },
+    { file: "The_Beef.png",          category: "culture" },
 ];
 
-const galleryGrid = document.getElementById('gallery-grid');
-const lightbox = document.getElementById('lightbox');
-const lightboxImg = document.getElementById('lightbox-img');
-const lightboxTitle = document.getElementById('lightbox-title');
-const closeLightbox = document.querySelector('.close-lightbox');
-const lightboxBackdrop = document.querySelector('.lightbox-backdrop');
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA — Minifigures
+// ─────────────────────────────────────────────────────────────────────────────
+const minifigures = [
+    // Politics
+    { file: "Trump.jpeg",             category: "politics" },
+    { file: "Trump New.png",          category: "politics", isNew: true },
+    { file: "Elon.png",               category: "politics" },
+    { file: "Maduro.png",             category: "politics" },
+    { file: "Netenyahu.png",          category: "politics", isNew: true },
+    { file: "Ayatollah.png",          category: "politics", isNew: true },
+    { file: "Dana White.jpg",         category: "politics" },
 
-// Navigation
-const prevBtn = document.querySelector('.prev-arrow');
-const nextBtn = document.querySelector('.next-arrow');
-let currentImageIndex = 0;
-let currentImages = [];
+    // Crime
+    { file: "Epstein.jpg",            category: "crime" },
+    { file: "Epstein.jpeg",           category: "crime", isNew: true },
+    { file: "Diddy.jpg",              category: "crime" },
+    { file: "Palm Beach Pete.jpeg",   category: "crime", isNew: true },
+    { file: "Walter White.jpeg",      category: "crime" },
+    { file: "Jordan Belfort.png",     category: "crime", isNew: true },
+    { file: "Scarface.jpeg",          category: "crime", isNew: true },
+    { file: "Wolf of Wall Street.png",category: "crime" },
+    { file: "Oj Simpson.jpg",         category: "crime" },
+    { file: "Joe Exotic.jpg",         category: "crime" },
+    { file: "Alon.jpg",               category: "crime" },
 
+    // Sports
+    { file: "Messi.png",              category: "sports" },
+    { file: "Ronaldo.png",            category: "sports" },
+    { file: "LeBron.png",             category: "sports" },
+    { file: "Mayweather.png",         category: "sports" },
+    { file: "Muhammed Ali.jpg",       category: "sports" },
+    { file: "Connor Mcgregor.jpg",    category: "sports" },
+    { file: "The Rock WWE.jpg",       category: "sports" },
+    { file: "Miley Cyrus.jpg",        category: "sports" },
+
+    // Entertainment
+    { file: "Patrick Bateman.jpg",    category: "entertainment" },
+    { file: "Patrick Bateman New.jpeg",category: "entertainment", isNew: true },
+    { file: "Dexter Morgan .jpeg",    category: "entertainment" },
+    { file: "Doakes.jpg",             category: "entertainment" },
+    { file: "John Wick.jpg",          category: "entertainment" },
+    { file: "Ghost.png",              category: "entertainment" },
+    { file: "Franklin Saint.png",     category: "entertainment" },
+    { file: "Happy Gilmore.jpg",      category: "entertainment" },
+    { file: "Joker.jpeg",             category: "entertainment" },
+    { file: "Venom.jpg",              category: "entertainment" },
+    { file: "Deadpool.jpg",           category: "entertainment" },
+    { file: "Jumanji.jpg",            category: "entertainment" },
+    { file: "Iron Man.jpg",           category: "entertainment" },
+    { file: "Iron Man 2.jpg",         category: "entertainment" },
+    { file: "YODA.jpg",               category: "entertainment" },
+    { file: "Darth Vader.jpg",        category: "entertainment" },
+    { file: "Storm Trooper.jpg",      category: "entertainment" },
+    { file: "Taylor Swift.jpg",       category: "entertainment" },
+    { file: "Taylor Swift 2.jpg",     category: "entertainment" },
+    { file: "Rihanna.jpg",            category: "entertainment" },
+    { file: "Beyonce.jpg",            category: "entertainment" },
+    { file: "Kanye.jpg",              category: "entertainment" },
+    { file: "Drake.jpg",              category: "entertainment" },
+    { file: "Slim Shady.jpg",         category: "entertainment" },
+    { file: "MJ.jpg",                 category: "entertainment" },
+    { file: "Robert Downey Jr.jpg",   category: "entertainment" },
+    { file: "Penguin.png",            category: "entertainment", isNew: true },
+    { file: "Punch.png",              category: "entertainment", isNew: true },
+    { file: "Clavicular.jpeg",        category: "entertainment", isNew: true },
+    { file: "Mitch 2.png",            category: "entertainment" },
+    { file: "Tate.jpg",               category: "entertainment" },
+    { file: "CZ.png",                 category: "entertainment" },
+
+    // Fiction / Cartoon
+    { file: "Fry.png",                category: "fiction" },
+    { file: "Leela.png",              category: "fiction" },
+    { file: "Bender.png",             category: "fiction" },
+    { file: "Ash Ketchum.jpg",        category: "fiction" },
+    { file: "Naruto.jpg",             category: "fiction" },
+    { file: "Spongebob.jpeg",         category: "fiction" },
+    { file: "Patrick Star.jpg",       category: "fiction" },
+    { file: "Squidward.jpg",          category: "fiction" },
+    { file: "Mr Crabs.jpg",           category: "fiction" },
+    { file: "Kermit.jpg",             category: "fiction" },
+    { file: "Ronald McDonald.jpg",    category: "fiction" },
+    { file: "Burger King.png",        category: "fiction" },
+    { file: "Grinch.jpg",             category: "fiction" },
+    { file: "Rick and Morty .jpg",    category: "fiction" },
+    { file: "Get Out.png",            category: "fiction" },
+    { file: "Blacked .png",           category: "fiction" },
+    { file: "ASHWGA.png",             category: "fiction" },
+    { file: "Ghost.png",              category: "fiction" },
+    { file: "Plague Doctor.jpg",      category: "fiction" },
+    { file: "Minerpng.png",           category: "fiction" },
+    { file: "Salt Bae.png",           category: "fiction" },
+    { file: "Routine.png",            category: "fiction" },
+
+    // Internet Memes
+    { file: "Pepe.jpg",               category: "internet" },
+    { file: "Troll Face.jpg",         category: "internet" },
+    { file: "Harambe.jpeg",           category: "internet" },
+    { file: "Moo Deng.jpg",           category: "internet" },
+    { file: "Kabuso.jpeg",            category: "internet" },
+    { file: "Chill Guy.jpg",          category: "internet" },
+    { file: "Chill House.jpg",        category: "internet" },
+    { file: "Meme Kid.png",           category: "internet" },
+    { file: "Looking Back Meme.png",  category: "internet" },
+    { file: "Burning Meme.jpg",       category: "internet" },
+    { file: "Sucess Kid.jpg",         category: "internet" },
+    { file: "Pwease.jpg",             category: "internet" },
+    { file: "Go Hamm.jpg",            category: "internet" },
+    { file: "Quant Kid.png",          category: "internet" },
+    { file: "Question_Mark_Guy.png",  category: "internet" },
+    { file: "Trax.png",               category: "internet" },
+    { file: "6ix9ine.jpg",            category: "internet" },
+    { file: "67.jpg",                 category: "internet" },
+    { file: "ishowspeed.jpg",         category: "internet" },
+    { file: "ninja.jpg",              category: "internet" },
+    { file: "Mr Beast.jpg",           category: "internet" },
+    { file: "George Floyd.jpg",       category: "internet" },
+    { file: "Rick Roll.jpeg",         category: "internet", isNew: true },
+    { file: "Tung Tung Sahur.jpeg",   category: "internet", isNew: true },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
 function formatTitle(filename) {
-    return filename.replace(/\.[a-zA-Z0-9]+$/, '')
+    return filename
+        .replace(/\.[a-zA-Z0-9]+$/, '')
         .replace(/_/g, ' ')
-        .replace(/-/g, ' ');
+        .replace(/-/g, ' ')
+        .replace(/ New$/, '');
 }
 
-// Populate Gallery
-if (galleryGrid) {
-    sets.forEach(set => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.setAttribute('role', 'button');
+// ─────────────────────────────────────────────────────────────────────────────
+// LIGHTBOX
+// ─────────────────────────────────────────────────────────────────────────────
+const lightbox        = document.getElementById('lightbox');
+const lightboxImg     = document.getElementById('lightbox-img');
+const lightboxTitle   = document.getElementById('lightbox-title');
+const closeLightbox   = document.querySelector('.close-lightbox');
+const lightboxBackdrop= document.querySelector('.lightbox-backdrop');
+const prevBtn         = document.querySelector('.prev-arrow');
+const nextBtn         = document.querySelector('.next-arrow');
 
-        // Use encodeURI for the image path to handle spaces
-        const imagePath = `assets/sets/${encodeURIComponent(set)}`;
-        const title = formatTitle(set);
+let currentImageIndex = 0;
+let currentImages     = [];
 
-        card.innerHTML = `
-            <div class="card-img-wrapper">
-                <img src="${imagePath}" alt="${title}" loading="lazy">
-            </div>
-            <div class="card-overlay">
-                <div class="card-title">${title}</div>
-                <div class="card-status">SOLD OUT</div>
-            </div>
-        `;
-
-        // Pass original filename to openLightbox, we'll encode logic there
-        card.addEventListener('click', () => openLightbox(set, title));
-        galleryGrid.appendChild(card);
-    });
-}
-
-// Lightbox Logic
 function openLightbox(input, title) {
-    // Determine if input is a full path (Minifigure) or a filename (Set)
-    const isMinifigure = input.includes('/');
-
-    // Reset State
     currentImages = [];
+    const isMinifigure = input.includes('/minifigures/');
 
     if (isMinifigure) {
-        // Simple Single Image Mode
-        // Encoded input if needed, but minfigs usually single word or simple
-        // Actually, we should encode the path just in case
         currentImages = [encodeURI(input)];
-        lightboxTitle.textContent = title;
-
-        // Hide arrows for single image
         if (prevBtn) prevBtn.style.display = 'none';
         if (nextBtn) nextBtn.style.display = 'none';
     } else {
-        // Set Carousel Mode
         const filename = input;
         const baseName = filename.substring(0, filename.lastIndexOf('.'));
-        const frontImg = `assets/sets/${filename}`;
-        const backImg = `assets/sets/${baseName}_back.png`;
-        const sideImg = `assets/sets/${baseName}_side.png`;
-
-        // Apply encodeURI to handle spaces
         currentImages = [
-            encodeURI(frontImg),
-            encodeURI(backImg),
-            encodeURI(sideImg)
+            encodeURI(`assets/sets/${filename}`),
+            encodeURI(`assets/sets/${baseName}_back.jpeg`),
+            encodeURI(`assets/sets/${baseName}_back.png`),
+            encodeURI(`assets/sets/${baseName}_side.png`),
         ];
-
-        lightboxTitle.textContent = title;
-
-        // Show arrows
         if (prevBtn) prevBtn.style.display = 'flex';
         if (nextBtn) nextBtn.style.display = 'flex';
     }
 
-    // Open Modal
+    lightboxTitle.textContent = title;
     setMainImage(0);
-    lightbox.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+    if (lightbox) {
+        lightbox.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function setMainImage(index) {
-    // Handle wrapping
     if (index < 0) index = currentImages.length - 1;
     if (index >= currentImages.length) index = 0;
-
     currentImageIndex = index;
-
-    // Set source
     const src = currentImages[index];
     lightboxImg.src = src;
-
-    // Error handling: if image fails (e.g. missing side view), try next?
-    // Or just let it show broken?
-    // Let's add a one-time error handler to skip.
     lightboxImg.onerror = function () {
-        // Prevent infinite loop if all fail
         if (currentImages.length <= 1) return;
-
-        // Remove this bad image from array
-        console.log("Image not found, skipping:", src);
         currentImages.splice(index, 1);
-
-        // Try setting same index (which is now the next image)
-        setMainImage(index);
+        if (currentImages.length > 0) setMainImage(Math.min(index, currentImages.length - 1));
     };
-
-    // Unbind generic error handler after load? No, simplest is to just reassign src.
-    // NOTE: The onerror above is bound to the element. It stays.
-    // We need to be careful not to create a stack overflow if all 3 fail.
-    // The previous check `currentImages.length <= 1` helps.
 }
 
-// Event Listeners
 if (prevBtn) prevBtn.onclick = () => setMainImage(currentImageIndex - 1);
 if (nextBtn) nextBtn.onclick = () => setMainImage(currentImageIndex + 1);
 
@@ -142,125 +254,36 @@ function closeLightboxFunc() {
     document.body.style.overflow = '';
 }
 
-if (closeLightbox) closeLightbox.addEventListener('click', closeLightboxFunc);
+if (closeLightbox)    closeLightbox.addEventListener('click', closeLightboxFunc);
 if (lightboxBackdrop) lightboxBackdrop.addEventListener('click', closeLightboxFunc);
-
 document.addEventListener('keydown', (e) => {
     if (!lightbox) return;
     if (e.key === 'Escape') closeLightboxFunc();
     if (!lightbox.classList.contains('hidden')) {
-        if (e.key === 'ArrowLeft') setMainImage(currentImageIndex - 1);
+        if (e.key === 'ArrowLeft')  setMainImage(currentImageIndex - 1);
         if (e.key === 'ArrowRight') setMainImage(currentImageIndex + 1);
     }
 });
 
-const minifigures = [
-    "67.jpg",
-    "6ix9ine.jpg",
-    "Question_Mark_Guy.png",
-    "ASHWGA.png",
-    "Alon.jpg",
-    "Ash Ketchum.jpg",
-    "Bender.png",
-    "Beyonce.jpg",
-    "Blacked .png",
-    "Burger King.png",
-    "Burning Meme.jpg",
-    "CZ.png",
-    "Chill Guy.jpg",
-    "Chill House.jpg",
-    "Connor Mcgregor.jpg",
-    "Dana White.jpg",
-    "Darth Vader.jpg",
-    "Deadpool.jpg",
-    "Dexter Morgan .jpeg",
-    "Diddy.jpg",
-    "Doakes.jpg",
-    "Drake.jpg",
-    "Elon.png",
-    "Epstein.jpg",
-    "Franklin Saint.png",
-    "Fry.png",
-    "George Floyd.jpg",
-    "Get Out.png",
-    "Ghost.png",
-    "Go Hamm.jpg",
-    "Grinch.jpg",
-    "Happy Gilmore.jpg",
-    "Harambe.jpeg",
-    "Iron Man 2.jpg",
-    "Iron Man.jpg",
-    "Joe Exotic.jpg",
-    "John Wick.jpg",
-    "Joker.jpeg",
-    "Jumanji.jpg",
-    "Kabuso.jpeg",
-    "Kanye.jpg",
-    "Kermit.jpg",
-    "LeBron.png",
-    "Leela.png",
-    "Looking Back Meme.png",
-    "MJ.jpg",
-    "Maduro.png",
-    "Mayweather.png",
-    "Meme Kid.png",
-    "Messi.png",
-    "Miley Cyrus.jpg",
-    "Minerpng.png",
-    "Mitch 2.png",
-    "Moo Deng.jpg",
-    "Mr Beast.jpg",
-    "Mr Crabs.jpg",
-    "Muhammed Ali.jpg",
-    "Naruto.jpg",
-    "Oj Simpson.jpg",
-    "Patrick Bateman.jpg",
-    "Patrick Star.jpg",
-    "Pepe.jpg",
-    "Plague Doctor.jpg",
-    "Pwease.jpg",
-    "Quant Kid.png",
-    "Rick and Morty .jpg",
-    "Rihanna.jpg",
-    "Robert Downey Jr.jpg",
-    "Ronald McDonald.jpg",
-    "Ronaldo.png",
-    "Routine.png",
-    "Salt Bae.png",
-    "Slim Shady.jpg",
-    "Spongebob.jpeg",
-    "Squidward.jpg",
-    "Storm Trooper.jpg",
-    "Sucess Kid.jpg",
-    "Tate.jpg",
-    "Taylor Swift 2.jpg",
-    "Taylor Swift.jpg",
-    "The Rock WWE.jpg",
-    "Trax.png",
-    "Troll Face.jpg",
-    "Trump.jpeg",
-    "Venom.jpg",
-    "Walter White.jpeg",
-    "Wolf of Wall Street.png",
-    "YODA.jpg",
-    "ishowspeed.jpg",
-    "ninja.jpg"
-];
-
-const minifigureGrid = document.getElementById('minifigure-grid');
-
-if (minifigureGrid) {
-    minifigures.forEach(figure => {
+// ─────────────────────────────────────────────────────────────────────────────
+// GALLERY BUILDER — generic for both drops and minifigures
+// ─────────────────────────────────────────────────────────────────────────────
+function buildCards(items, gridEl, assetFolder, isSetsPage) {
+    gridEl.innerHTML = '';
+    items.forEach(item => {
         const card = document.createElement('div');
         card.className = 'card';
         card.setAttribute('role', 'button');
+        card.dataset.category = item.category;
+        if (item.isNew) card.dataset.new = 'true';
 
-        const imagePath = `assets/minifigures/${figure}`;
-        const title = formatTitle(figure);
+        const imagePath = `assets/${assetFolder}/${item.file}`;
+        const title = formatTitle(item.file);
 
         card.innerHTML = `
             <div class="card-img-wrapper">
-                <img src="${imagePath}" alt="${title}" loading="lazy">
+                <img src="${encodeURI(imagePath)}" alt="${title}" loading="lazy">
+                ${item.isNew ? '<span class="new-badge">NEW</span>' : ''}
             </div>
             <div class="card-overlay">
                 <div class="card-title">${title}</div>
@@ -268,13 +291,68 @@ if (minifigureGrid) {
             </div>
         `;
 
-        card.addEventListener('click', () => openLightbox(imagePath, title));
-        minifigureGrid.appendChild(card);
+        card.addEventListener('click', () => {
+            if (isSetsPage) {
+                openLightbox(item.file, title);
+            } else {
+                openLightbox(imagePath, title);
+            }
+        });
+
+        gridEl.appendChild(card);
     });
 }
 
-// Video Mute Toggle Logic
-const heroVideo = document.getElementById('heroVideo');
+// ─────────────────────────────────────────────────────────────────────────────
+// FILTER LOGIC
+// ─────────────────────────────────────────────────────────────────────────────
+function setupFilters(barId, items, gridEl, assetFolder, isSetsPage) {
+    const bar = document.getElementById(barId);
+    if (!bar) return;
+
+    // Build initial grid with all items
+    buildCards(items, gridEl, assetFolder, isSetsPage);
+
+    bar.addEventListener('click', e => {
+        const btn = e.target.closest('.filter-btn');
+        if (!btn) return;
+
+        bar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const filter = btn.dataset.filter;
+
+        let filtered;
+        if (filter === 'all') {
+            filtered = items;
+        } else if (filter === 'new') {
+            filtered = items.filter(i => i.isNew);
+        } else {
+            filtered = items.filter(i => i.category === filter);
+        }
+
+        buildCards(filtered, gridEl, assetFolder, isSetsPage);
+    });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────────
+const galleryGrid     = document.getElementById('gallery-grid');
+const minifigureGrid  = document.getElementById('minifigure-grid');
+
+if (galleryGrid) {
+    setupFilters('dropFilterBar', sets, galleryGrid, 'sets', true);
+}
+
+if (minifigureGrid) {
+    setupFilters('figFilterBar', minifigures, minifigureGrid, 'minifigures', false);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VIDEO
+// ─────────────────────────────────────────────────────────────────────────────
+const heroVideo  = document.getElementById('heroVideo');
 const muteToggle = document.getElementById('muteToggle');
 
 if (heroVideo && muteToggle) {
@@ -282,8 +360,7 @@ if (heroVideo && muteToggle) {
         if (heroVideo.muted) {
             heroVideo.muted = false;
             muteToggle.textContent = 'MUTE';
-            // Ensure play is forced just in case browser pauses on unmute
-            heroVideo.play().catch(e => console.log('Autoplay unmuted blocked', e));
+            heroVideo.play().catch(e => console.log('Autoplay blocked', e));
         } else {
             heroVideo.muted = true;
             muteToggle.textContent = 'UNMUTE';
@@ -291,22 +368,21 @@ if (heroVideo && muteToggle) {
     });
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// CA COPY
+// ─────────────────────────────────────────────────────────────────────────────
 function copyCA(element) {
-    const caTextElement = element.querySelector('.ca-text');
-    if (!caTextElement) return;
-    
-    const textToCopy = caTextElement.textContent;
-    if (textToCopy === 'COMING SOON' || textToCopy === 'NOT YET AVAILABLE') {
-        const originalText = caTextElement.textContent;
-        caTextElement.textContent = 'NOT YET AVAILABLE';
-        setTimeout(() => caTextElement.textContent = originalText, 1500);
+    const caTextEl = element.querySelector('.ca-text');
+    if (!caTextEl) return;
+    const text = caTextEl.textContent;
+    if (text === 'COMING SOON' || text === 'NOT YET AVAILABLE') {
+        caTextEl.textContent = 'NOT YET AVAILABLE';
+        setTimeout(() => caTextEl.textContent = text, 1500);
         return;
     }
-    
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        const originalText = caTextElement.textContent;
-        caTextElement.textContent = 'COPIED!';
-        setTimeout(() => caTextElement.textContent = originalText, 1500);
+    navigator.clipboard.writeText(text).then(() => {
+        const orig = caTextEl.textContent;
+        caTextEl.textContent = 'COPIED!';
+        setTimeout(() => caTextEl.textContent = orig, 1500);
     });
 }
-
