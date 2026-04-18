@@ -1,5 +1,39 @@
 export const maxDuration = 60;
 
+// Small sleep helper
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+// Pollinations fetch with retry + model fallback on 429
+async function fetchPollinationsImage(prompt, retries = 3) {
+  const models = ['flux', 'turbo', 'flux-realism'];
+  const encodedPrompt = encodeURIComponent(prompt);
+
+  for (let attempt = 0; attempt < retries; attempt++) {
+    const model = models[attempt % models.length];
+    const seed  = Math.floor(Math.random() * 999999);
+    const url   = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&model=${model}&nologo=true&seed=${seed}`;
+
+    const imgRes = await fetch(url);
+
+    if (imgRes.ok) {
+      return imgRes; // success
+    }
+
+    if (imgRes.status === 429) {
+      // Rate limited — wait a bit then try next model
+      const waitMs = 1500 * (attempt + 1); // 1.5s, 3s, 4.5s
+      console.warn(`[Pollinations] 429 on model=${model}, waiting ${waitMs}ms before retry ${attempt + 1}/${retries}`);
+      await sleep(waitMs);
+      continue;
+    }
+
+    // Any other error — fail immediately
+    throw new Error(`Image generation failed: ${imgRes.status} ${imgRes.statusText}`);
+  }
+
+  throw new Error('Image generation failed after multiple retries (rate limited). Please try again in a moment.');
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
@@ -58,19 +92,10 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: 'Vision returned no usable description.' });
     }
 
-    // ── Step 2: Generate Lego image via Pollinations.ai (Flux, free, no key) ─
-    // Build a highly targeted prompt
+    // ── Step 2: Generate Lego image via Pollinations.ai (with retry) ─────────
     const prompt = `A 3D rendered glossy plastic LEGO minifigure character. The LEGO figure must match this person's appearance exactly: ${description}. Background: ${bg}. Studio lighting, product photo style, photorealistic LEGO plastic texture.`;
 
-    const encodedPrompt = encodeURIComponent(prompt);
-    const imageGenUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&model=flux&nologo=true&seed=${Math.floor(Math.random() * 999999)}`;
-
-    // Fetch the image from Pollinations and pipe it back to the browser
-    const imgRes = await fetch(imageGenUrl);
-
-    if (!imgRes.ok) {
-      return res.status(502).json({ error: `Image generation failed: ${imgRes.status} ${imgRes.statusText}` });
-    }
+    const imgRes = await fetchPollinationsImage(prompt);
 
     const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
     const arrayBuffer = await imgRes.arrayBuffer();
@@ -79,11 +104,11 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       url: `data:${contentType};base64,${base64}`,
-      description // pass back for debugging
+      description
     });
 
   } catch (err) {
     console.error('[PFP Generate Error]', err);
-    return res.status(500).json({ error: 'Server error: ' + err.message });
+    return res.status(500).json({ error: err.message });
   }
 }
