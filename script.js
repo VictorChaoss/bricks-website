@@ -72,8 +72,8 @@ const minifigures = [
     { file: "Scarface.jpeg",           category: "crime",         isNew: true },
     { file: "Patrick Bateman New.jpeg",category: "entertainment", isNew: true },
     { file: "Clavicular.jpeg",         category: "entertainment", isNew: true },
-    { file: "Penguin.png",             category: "fiction",       isNew: true },
-    { file: "Punch.png",               category: "fiction",       isNew: true },
+    { file: "Penguin.png",             category: "crypto",        isNew: true },
+    { file: "Punch.png",               category: "crypto",        isNew: true },
     { file: "Rick Roll.jpeg",          category: "internet",      isNew: true },
     { file: "Tung Tung Sahur.jpeg",    category: "internet",      isNew: true },
 
@@ -82,13 +82,12 @@ const minifigures = [
     { file: "Maduro.png",              category: "politics" },
     { file: "Dana White.jpg",          category: "politics" },
 
-    // Crypto
+    // Crypto — CZ, Mitch, Penguin, Punch (Penguin & Punch above in new block)
     { file: "CZ.png",                  category: "crypto" },
-    { file: "Trax.png",                category: "crypto" },
+    { file: "Mitch 2.png",             category: "crypto" },
 
     // Crime — Alon first
     { file: "Alon.jpg",                category: "crime" },
-    { file: "Epstein.jpg",             category: "crime" },
     { file: "Diddy.jpg",               category: "crime" },
     { file: "Walter White.jpeg",       category: "crime" },
     { file: "Wolf of Wall Street.png", category: "crime" },
@@ -105,7 +104,6 @@ const minifigures = [
     { file: "The Rock WWE.jpg",        category: "sports" },
 
     // Entertainment
-    { file: "Patrick Bateman.jpg",     category: "entertainment" },
     { file: "Dexter Morgan .jpeg",     category: "entertainment" },
     { file: "Doakes.jpg",              category: "entertainment" },
     { file: "John Wick.jpg",           category: "entertainment" },
@@ -132,9 +130,8 @@ const minifigures = [
     { file: "Robert Downey Jr.jpg",    category: "entertainment" },
     { file: "Miley Cyrus.jpg",         category: "entertainment" },
     { file: "Tate.jpg",                category: "entertainment" },
-    { file: "Mitch 2.png",             category: "entertainment" },
 
-    // Fiction / Cartoon — Minerpng first, then Penguin / Punch (already in new block above)
+    // Fiction / Cartoon — Minerpng first
     { file: "Minerpng.png",            category: "fiction" },
     { file: "Fry.png",                 category: "fiction" },
     { file: "Leela.png",               category: "fiction" },
@@ -156,7 +153,7 @@ const minifigures = [
     { file: "Salt Bae.png",            category: "fiction" },
     { file: "Routine.png",             category: "fiction" },
 
-    // Internet Memes — Trax & 67 first, then Tung Tung (already in new block), then rest
+    // Internet Memes — Trax & 67 first, then Tung Tung (already in new block)
     { file: "Trax.png",                category: "internet" },
     { file: "67.jpg",                  category: "internet" },
     { file: "Burger King.png",         category: "internet" },
