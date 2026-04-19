@@ -1,58 +1,106 @@
 export const maxDuration = 60;
 
-// Small sleep helper
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-// Pollinations fetch with retry + model fallback on 429
-async function fetchPollinationsImage(prompt, retries = 3) {
-  const models = ['flux', 'turbo', 'flux-realism'];
-  const encodedPrompt = encodeURIComponent(prompt);
+// ── OpenRouter image generation via chat/completions + modalities ─────────────
+// Tries two cheap image models in order before giving up.
+async function generateWithOpenRouter(prompt, apiKey) {
+  const models = [
+    'google/gemini-2.5-flash-image',  // ~$0.0025 per 1k tokens – effectively pennies
+    'openai/gpt-5-image-mini',        // fallback
+  ];
 
-  for (let attempt = 0; attempt < retries; attempt++) {
-    const model = models[attempt % models.length];
-    const seed  = Math.floor(Math.random() * 999999);
-    const url   = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&model=${model}&nologo=true&seed=${seed}`;
+  for (let i = 0; i < models.length; i++) {
+    const model = models[i];
+    console.log(`[OR Image] Trying model: ${model}`);
 
-    const imgRes = await fetch(url);
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://bricks-website.vercel.app",
+        "X-Title": "Bricks PFP Maker"
+      },
+      body: JSON.stringify({
+        model,
+        modalities: ["image"],          // tells OpenRouter we want an image output
+        messages: [{
+          role: "user",
+          content: prompt
+        }]
+      })
+    });
 
-    if (imgRes.ok) {
-      return imgRes; // success
+    if (!res.ok) {
+      const txt = await res.text();
+      console.warn(`[OR Image] ${model} failed (${res.status}): ${txt.substring(0, 200)}`);
+      if (i < models.length - 1) { await sleep(1000); continue; }
+      throw new Error(`OpenRouter image generation failed after all models: ${res.status}`);
     }
 
-    if (imgRes.status === 429) {
-      // Rate limited — wait a bit then try next model
-      const waitMs = 1500 * (attempt + 1); // 1.5s, 3s, 4.5s
-      console.warn(`[Pollinations] 429 on model=${model}, waiting ${waitMs}ms before retry ${attempt + 1}/${retries}`);
-      await sleep(waitMs);
-      continue;
+    const json = await res.json();
+
+    // OpenRouter returns images in message.images[] as base64 strings
+    const images = json?.choices?.[0]?.message?.images;
+    if (images && images.length > 0) {
+      console.log(`[OR Image] Success with ${model}`);
+      return `data:image/png;base64,${images[0]}`;
     }
 
-    // Any other error — fail immediately
-    throw new Error(`Image generation failed: ${imgRes.status} ${imgRes.statusText}`);
+    // Some models embed the image in content parts instead
+    const content = json?.choices?.[0]?.message?.content;
+    if (Array.isArray(content)) {
+      const imgPart = content.find(p => p.type === 'image_url');
+      if (imgPart?.image_url?.url) return imgPart.image_url.url;
+      const inlinePart = content.find(p => p.type === 'inline_data' || p.inlineData);
+      const inline = inlinePart?.inline_data || inlinePart?.inlineData;
+      if (inline?.data) return `data:${inline.mime_type || 'image/png'};base64,${inline.data}`;
+    }
+
+    // Unexpected response structure — log it and try next model
+    console.warn(`[OR Image] ${model} returned unexpected structure:`, JSON.stringify(json).substring(0, 300));
+    if (i < models.length - 1) { await sleep(1000); continue; }
+    throw new Error(`OpenRouter returned no image data. Raw: ${JSON.stringify(json).substring(0, 200)}`);
   }
-
-  throw new Error('Image generation failed after multiple retries (rate limited). Please try again in a moment.');
 }
 
+// ── Pollinations fallback (free, Flux) ──────────────────────────────────────
+async function generateWithPollinations(prompt) {
+  const models = ['flux', 'turbo'];
+  const encodedPrompt = encodeURIComponent(prompt);
+
+  for (let i = 0; i < models.length; i++) {
+    if (i > 0) await sleep(1500);
+    const model = models[i];
+    const seed  = Math.floor(Math.random() * 999999);
+    const url   = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&model=${model}&nologo=true&seed=${seed}`;
+    const imgRes = await fetch(url);
+    if (imgRes.ok) {
+      const buf = Buffer.from(await imgRes.arrayBuffer());
+      const ct  = imgRes.headers.get('content-type') || 'image/jpeg';
+      return `data:${ct};base64,${buf.toString('base64')}`;
+    }
+    if (imgRes.status !== 429) throw new Error(`Pollinations failed: ${imgRes.status}`);
+  }
+  throw new Error('Image generation failed after retries. Please try again in a moment.');
+}
+
+// ── Main handler ──────────────────────────────────────────────────────────────
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   const { image, background } = req.body;
-  if (!image) {
-    return res.status(400).json({ error: 'No image provided' });
-  }
+  if (!image) return res.status(400).json({ error: 'No image provided' });
 
-  const bg = (background && background.trim()) ? background.trim() : 'clean white studio background';
-
+  const bg     = (background?.trim()) ? background.trim() : 'clean white studio background';
   const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: 'OPENROUTER_API_KEY missing from Vercel environment variables.' });
-  }
+  if (!apiKey) return res.status(500).json({ error: 'OPENROUTER_API_KEY not set in Vercel environment.' });
 
   try {
-    // ── Step 1: Describe the person using GPT-4o-mini vision ─────────────────
+    // ── Step 1: Vision — describe the person ──────────────────────────────────
     const visionRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -71,41 +119,37 @@ export default async function handler(req, res) {
               type: "text",
               text: "Describe this person's physical appearance for an AI image generator. Include: hair color and style, skin tone, eye color if visible, face shape, and any notable clothing. Keep it to 1-2 sentences max. Be specific and factual."
             },
-            {
-              type: "image_url",
-              image_url: { url: image }
-            }
+            { type: "image_url", image_url: { url: image } }
           ]
         }]
       })
     });
 
     if (!visionRes.ok) {
-      const errText = await visionRes.text();
-      return res.status(502).json({ error: `Vision failed (${visionRes.status}): ${errText.substring(0, 200)}` });
+      const txt = await visionRes.text();
+      return res.status(502).json({ error: `Vision step failed (${visionRes.status}): ${txt.substring(0, 200)}` });
     }
 
-    const visionJson = await visionRes.json();
+    const visionJson  = await visionRes.json();
     const description = visionJson?.choices?.[0]?.message?.content;
-
     if (!description || typeof description !== 'string') {
       return res.status(502).json({ error: 'Vision returned no usable description.' });
     }
 
-    // ── Step 2: Generate Lego image via Pollinations.ai (with retry) ─────────
+    // ── Step 2: Image generation ──────────────────────────────────────────────
     const prompt = `A 3D rendered glossy plastic LEGO minifigure character. The LEGO figure must match this person's appearance exactly: ${description}. Background: ${bg}. Studio lighting, product photo style, photorealistic LEGO plastic texture.`;
 
-    const imgRes = await fetchPollinationsImage(prompt);
+    let imageUrl;
+    try {
+      // Primary: use OpenRouter credits
+      imageUrl = await generateWithOpenRouter(prompt, apiKey);
+    } catch (orErr) {
+      console.warn('[PFP] OpenRouter image gen failed, falling back to Pollinations:', orErr.message);
+      // Fallback: Pollinations (free Flux)
+      imageUrl = await generateWithPollinations(prompt);
+    }
 
-    const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
-    const arrayBuffer = await imgRes.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const base64 = buffer.toString('base64');
-
-    return res.status(200).json({
-      url: `data:${contentType};base64,${base64}`,
-      description
-    });
+    return res.status(200).json({ url: imageUrl, description });
 
   } catch (err) {
     console.error('[PFP Generate Error]', err);
