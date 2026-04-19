@@ -8,46 +8,65 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Oswald:wght@500;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        .socials-container {
-            min-height: 80vh;
+        /* ── Socials page layout ──────────────────────────────────────── */
+        .socials-page {
+            min-height: calc(100vh - 80px); /* fill below header */
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            gap: 4rem;
-            padding: 2rem;
+            justify-content: center;
+            gap: 3rem;
+            padding: 3rem 2rem 4rem;
+            box-sizing: border-box;
+        }
+
+        /* CA bar sits alone on its own row */
+        .socials-ca {
+            width: 100%;
+            max-width: 560px;
+        }
+
+        /* Cards row */
+        .socials-cards {
+            display: flex;
             flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            align-items: stretch;
         }
 
         .social-card {
             background: rgba(25, 25, 25, 0.6);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 3rem;
+            padding: 2.5rem 3rem;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
             transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
             cursor: pointer;
-            width: 300px;
+            width: 240px;
+            min-height: 260px;
             text-decoration: none;
         }
 
         .social-card:hover {
-            transform: translateY(-10px);
+            transform: translateY(-8px);
             border-color: var(--accent);
             box-shadow: 0 0 30px rgba(255, 59, 48, 0.2);
         }
 
         .social-logo {
-            width: 150px;
-            height: 150px;
+            width: 120px;
+            height: 120px;
             object-fit: contain;
-            margin-bottom: 2rem;
             filter: grayscale(100%);
             transition: filter 0.3s ease;
+            display: block;
         }
 
         .social-card:hover .social-logo {
@@ -56,9 +75,33 @@
 
         .social-name {
             font-family: var(--font-display);
-            font-size: 2rem;
+            font-size: 1.6rem;
             color: #fff;
             text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            .socials-page {
+                gap: 2rem;
+                padding: 2rem 1rem 3rem;
+            }
+
+            .social-card {
+                width: min(200px, 80vw);
+                padding: 2rem;
+                min-height: 220px;
+            }
+
+            .social-logo {
+                width: 90px;
+                height: 90px;
+            }
+
+            .social-name {
+                font-size: 1.3rem;
+            }
         }
     </style>
 </head>
@@ -82,30 +125,38 @@
     </header>
 
     <main>
-        <section class="socials-container">
-            <!-- CA Placeholder -->
-            <div class="ca-placeholder-container" style="width: 100%; max-width: 600px; margin-bottom: 2rem;" onclick="copyCA(this)">
-                <div class="ca-label">CA:</div>
-                <div class="ca-text">COMING SOON</div>
-                <div class="ca-copy-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
+        <section class="socials-page">
+
+            <!-- CA bar -->
+            <div class="socials-ca">
+                <div class="ca-placeholder-container" onclick="copyCA(this)">
+                    <div class="ca-label">CA:</div>
+                    <div class="ca-text">COMING SOON</div>
+                    <div class="ca-copy-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </div>
                 </div>
             </div>
 
-            <!-- Pump Fun -->
-            <a href="#" class="social-card">
-                <img src="assets/pump.jpg" alt="Pump Fun" class="social-logo">
-                <span class="social-name">Pump.fun</span>
-            </a>
+            <!-- Social cards -->
+            <div class="socials-cards">
 
-            <!-- X -->
-            <a href="https://x.com/Bricks_OnSol" target="_blank" class="social-card">
-                <img src="assets/x.png" alt="X" class="social-logo">
-                <span class="social-name">X</span>
-            </a>
+                <!-- Pump.fun -->
+                <a href="#" class="social-card">
+                    <img src="assets/pump.jpg" alt="Pump Fun" class="social-logo">
+                    <span class="social-name">Pump.fun</span>
+                </a>
+
+                <!-- X / Twitter -->
+                <a href="https://x.com/Bricks_OnSol" target="_blank" class="social-card">
+                    <img src="assets/x.png" alt="X" class="social-logo">
+                    <span class="social-name">X</span>
+                </a>
+
+            </div>
         </section>
     </main>
 
@@ -115,6 +166,8 @@
             <p>For parody and entertainment purposes only.</p>
         </div>
     </footer>
+
+    <script src="script.js"></script>
 </body>
 
 </html>
