@@ -4,10 +4,15 @@
 // ─────────────────────────────────────────────────────────────────────────────
 const sets = [
     // 🔥 NEW — rises to top in ALL view
-    { file: "Strait of Hormuz.jpeg", category: "politics", isNew: true },
-    { file: "Kit Kat Heist.jpeg",    category: "crime",    isNew: true },
-    { file: "Artemis.jpeg",          category: "crime",    isNew: true },
-    { file: "Italian Brainrot.jpeg", category: "culture",  isNew: true },
+    { file: "Asteroid.jpeg",          category: "culture",  isNew: true },
+    { file: "Day Care Centre.jpeg",   category: "culture",  isNew: true },
+    { file: "Looks Maxxing.jpeg",     category: "internet", isNew: true },
+    { file: "Punch.jpeg",             category: "culture",  isNew: true },
+    { file: "Stock Market.jpeg",      category: "crime",    isNew: true },
+    { file: "Strait of Hormuz.jpeg",  category: "politics", isNew: true },
+    { file: "Kit Kat Heist.jpeg",     category: "crime",    isNew: true },
+    { file: "Artemis.jpeg",           category: "crime",    isNew: true },
+    { file: "Italian Brainrot.jpeg",  category: "culture",  isNew: true },
 
     // Politics
     { file: "JFK.PNG",               category: "politics" },
