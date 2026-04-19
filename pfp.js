@@ -9,6 +9,8 @@ const errorBox      = document.getElementById('errorBox');
 const resultZone    = document.getElementById('resultZone');
 const resultImage   = document.getElementById('resultImage');
 const downloadBtn   = document.getElementById('downloadBtn');
+const shareXBtn     = document.getElementById('shareXBtn');
+const shareHint     = document.getElementById('shareHint');
 const bgPresets     = document.getElementById('bgPresets');
 const customBgInput = document.getElementById('customBgInput');
 
@@ -123,8 +125,7 @@ function showResult(imageUrl) {
 
     resultImage.src = imageUrl;
 
-    // Base64 data URLs download natively — no proxy needed
-    // HTTP URLs need the proxy to bypass CORS on download
+    // Download
     if (imageUrl.startsWith('data:')) {
         downloadBtn.href = imageUrl;
         downloadBtn.download = 'bricks_pfp.png';
@@ -132,6 +133,38 @@ function showResult(imageUrl) {
         downloadBtn.href = `/api/download?url=${encodeURIComponent(imageUrl)}`;
         downloadBtn.download = 'bricks_pfp.png';
     }
+
+    // Share to X
+    shareXBtn.onclick = async () => {
+        const tweetText = encodeURIComponent('Just turned myself into a LEGO minifigure 🧱🔥 @BricksOnSol #BRICKS');
+        const tweetUrl  = encodeURIComponent('https://bricks-website.vercel.app/pfp.html');
+
+        // Try native share (works on iOS/Android — can attach image directly)
+        if (navigator.canShare && navigator.share) {
+            try {
+                // Convert data URL to File for native share
+                const res   = await fetch(imageUrl);
+                const blob  = await res.blob();
+                const file  = new File([blob], 'bricks_pfp.png', { type: blob.type });
+                if (navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        text: 'Just turned myself into a LEGO minifigure 🧱🔥 @BricksOnSol #BRICKS',
+                        url: 'https://bricks-website.vercel.app/pfp.html'
+                    });
+                    return;
+                }
+            } catch (e) {
+                // Fallback to Twitter web intent below
+            }
+        }
+
+        // Desktop fallback — open Twitter intent, prompt to attach image
+        window.open(`https://twitter.com/intent/tweet?text=${tweetText}&url=${tweetUrl}`, '_blank');
+        // Show the hint about attaching the image
+        shareHint.classList.remove('hidden');
+        setTimeout(() => shareHint.classList.add('hidden'), 6000);
+    };
 
     resultZone.classList.remove('hidden');
     resultZone.scrollIntoView({ behavior: 'smooth', block: 'start' });
