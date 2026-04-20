@@ -136,7 +136,7 @@ function showResult(imageUrl) {
 
     // Share to X
     shareXBtn.onclick = async () => {
-        const tweetText = encodeURIComponent('Just turned myself into a LEGO minifigure 🧱🔥 @BricksOnSol #BRICKS');
+        const tweetText = encodeURIComponent('Just turned myself into a LEGO minifigure 🧱🔥 @buildonbricks #BRICKS');
         const tweetUrl  = encodeURIComponent('https://www.bricksonsol.xyz/pfp.html');
 
         // Try native share (works on iOS/Android — can attach image directly)
@@ -149,7 +149,7 @@ function showResult(imageUrl) {
                 if (navigator.canShare({ files: [file] })) {
                     await navigator.share({
                         files: [file],
-                        text: 'Just turned myself into a LEGO minifigure 🧱🔥 @BricksOnSol #BRICKS',
+                        text: 'Just turned myself into a LEGO minifigure 🧱🔥 @buildonbricks #BRICKS',
                         url: 'https://www.bricksonsol.xyz/pfp.html'
                     });
                     return;
